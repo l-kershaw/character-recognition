@@ -26,7 +26,19 @@ class NeuralNetwork:
 		pass
 		
 	# train the neural network
-	def train():
+	def train(self,inputs_list,targets_list):
+		lr = self.lr
+		new_weights = []
+		new_biases = []
+		for i in reversed(range(len(self.shape))):
+			new_layer_weights = self.weights[i] # placeholder
+			new_weights.append(new_layer_weights)
+			new_layer_biases = self.biases[i] # placeholder
+			new_biases.appen(new_layer_biases)
+		new_weights = reversed(new_weights)
+		new_biases = reversed(new_biases)
+		self.weights = new_weights
+		self.biases = new_biases
 		pass
 		
 	# query the neural network
