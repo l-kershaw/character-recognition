@@ -27,14 +27,35 @@ class NeuralNetwork:
 		
 	# train the neural network
 	def train(self,inputs_list,targets_list):
-		lr = self.lr
+		# calculate outputs of each layer
+		# convert list to numpy array
+		inputs = numpy.array(inputs_list,ndmin=2).T
+		activations = [inputs]
+		# for each layer in the network
+		for i in range(len(self.shape)-1):
+			# print(i, activations)
+			outputs = numpy.dot(self.weights[i],activations[i]) + numpy.tile(self.biases[i],(1,len(inputs_list)))
+			activations.append(self.activation_function(outputs))
+		errors = [False]*(len(inputs_list))
+		errors[-1] = activations[-1]-numpy.array(targets_list,ndmin=2).T
+		# adjust the weights and biases of each layer
 		new_weights = []
 		new_biases = []
-		for i in reversed(range(len(self.shape))):
-			new_layer_weights = self.weights[i] # placeholder
+		print(self.shape)
+		for i in reversed(range(1,len(self.shape))):
+			# adjust weights of connections between layer i-1 and layer i
+			print("weights")
+			adjust_weights = self.lr * numpy.dot((errors[i] * activations[i] * (1.0 - activations[i])),numpy.transpose(activations[i-1]))
+			print(self.weights[i-1],adjust_weights)
+			new_layer_weights = self.weights[i-1] + adjust_weights
 			new_weights.append(new_layer_weights)
-			new_layer_biases = self.biases[i] # placeholder
-			new_biases.appen(new_layer_biases)
+			# adjust biases of nodes in layer i
+			print("biases")
+			adjust_biases = self.lr * errors[i]
+			new_layer_biases = self.biases[i-1] + adjust_biases
+			new_biases.append(new_layer_biases)
+			# calculate errors for layer i-1 
+			errors[i-1] = numpy.dot(self.weights[i-1].T,errors[i])
 		new_weights = reversed(new_weights)
 		new_biases = reversed(new_biases)
 		self.weights = new_weights
@@ -55,9 +76,17 @@ class NeuralNetwork:
 		return activations
 	
 	
+def main():
+	numpy.random.seed(1)
+	net = NeuralNetwork([5,5,2],0.5)
+	print("1", net.query([10,-10,99,0,5]))
+	inputs_list = numpy.random.rand(100,5)
+	inputs_list = inputs_list.tolist()
+	targets_list = [[x[0]+x[1],x[3]+x[4]] for x in inputs_list]
+	net.train(inputs_list,targets_list)
+	
+	print("2", net.query([10,-10,99,0,5]))
 	
 	
-	
-
 if __name__ == "__main__":
 	pass
