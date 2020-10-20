@@ -36,28 +36,35 @@ class NeuralNetwork:
 			# print(i, activations)
 			outputs = numpy.dot(self.weights[i],activations[i]) + numpy.tile(self.biases[i],(1,len(inputs_list)))
 			activations.append(self.activation_function(outputs))
-		errors = [False]*(len(inputs_list))
-		errors[-1] = activations[-1]-numpy.array(targets_list,ndmin=2).T
+		errors = [False]*(len(self.shape))
+		errors[-1] = numpy.array(targets_list,ndmin=2).T-activations[-1]
 		# adjust the weights and biases of each layer
 		new_weights = []
 		new_biases = []
 		print(self.shape)
 		for i in reversed(range(1,len(self.shape))):
 			# adjust weights of connections between layer i-1 and layer i
-			print("weights")
+			#print("weights")
+			#print(errors[i])
+			#print("e:",errors[i].shape,"a:",activations[i].shape,activations[i-1].shape)
+			#print(activations[i][0])
+			# 
 			adjust_weights = self.lr * numpy.dot((errors[i] * activations[i] * (1.0 - activations[i])),numpy.transpose(activations[i-1]))
-			print(self.weights[i-1],adjust_weights)
+			#print(self.weights[i-1],adjust_weights)
+			#print(self.weights[i-1],"\n",adjust_weights)
 			new_layer_weights = self.weights[i-1] + adjust_weights
 			new_weights.append(new_layer_weights)
 			# adjust biases of nodes in layer i
-			print("biases")
-			adjust_biases = self.lr * errors[i]
+			#print("biases")
+			adjust_biases = self.lr * numpy.dot(errors[i],numpy.ones((errors[i].shape[1],1)))/errors[i].shape[1]
+			#print(self.biases[i-1],"\n",adjust_biases)
+			#print(self.biases[i-1],adjust_biases)
 			new_layer_biases = self.biases[i-1] + adjust_biases
 			new_biases.append(new_layer_biases)
 			# calculate errors for layer i-1 
 			errors[i-1] = numpy.dot(self.weights[i-1].T,errors[i])
-		new_weights = reversed(new_weights)
-		new_biases = reversed(new_biases)
+		new_weights = new_weights[::-1]
+		new_biases = new_biases[::-1]
 		self.weights = new_weights
 		self.biases = new_biases
 		pass
@@ -78,14 +85,17 @@ class NeuralNetwork:
 	
 def main():
 	numpy.random.seed(1)
-	net = NeuralNetwork([5,5,2],0.5)
-	print("1", net.query([10,-10,99,0,5]))
-	inputs_list = numpy.random.rand(100,5)
-	inputs_list = inputs_list.tolist()
-	targets_list = [[x[0]+x[1],x[3]+x[4]] for x in inputs_list]
-	net.train(inputs_list,targets_list)
+	net = NeuralNetwork([5,3,2],0.1)
+	print("0", net.query([10,-10,99,0,5]))
+	for i in range(1,10):
+		inputs_list = numpy.random.rand(1000,5)
+		inputs_list = inputs_list.tolist()
+		targets_list = [[x[0]+x[1],x[3]+x[4]] for x in inputs_list]
+		net.train(inputs_list,targets_list)
+		print(i,": ",net.query([10,-10,99,0,5]))
+		
+	return net
 	
-	print("2", net.query([10,-10,99,0,5]))
 	
 	
 if __name__ == "__main__":
