@@ -1,102 +1,145 @@
 import numpy
-from scipy.special import expit
+import scipy.special
+import random
 
-# neural network class definition
 class NeuralNetwork:
-	
-	# initialise the neural network
-	def __init__(self, layer_shape, learning_rate):
-		# set number of nodes in each layer (hidden may be a list)
-		self.shape = layer_shape
-		# set the learning rate
-		self.lr = learning_rate
-		# set activation function
-		self.activation_function = lambda x: expit(x)
 		
-		# initialise weights between each layer
+		
+	# initialise the neural network
+	def __init__(self, layer_shape, learningrate):
+		# set number of nodes in each layer
+		self.shape = layer_shape
+		self.layers = len(self.shape)
+		
+		# link weight matrices
 		self.weights = []
-		for layer in range(0,len(self.shape)-1):
-			layer_weights = numpy.random.normal(0.0, pow(self.shape[layer+1],-0.5),(self.shape[layer+1],self.shape[layer]))
-			self.weights.append(layer_weights)
-		# initialise biases at each layer
-		self.biases = []
-		for layer in range(1,len(self.shape)):
-			layer_biases = numpy.random.normal(0.0, pow(self.shape[layer],-0.5),(self.shape[layer],1))
-			self.biases.append(layer_biases)
+		for i in range(0,self.layers-1):
+			self.weights.append(numpy.random.normal(0.0, pow(self.shape[i+1], -0.5), (self.shape[i+1], self.shape[i])))
+
+		# learning rate
+		self.lr = learningrate
+		
+		# activation function is the sigmoid function
+		self.activation_function = lambda x: scipy.special.expit(x)
+		
 		pass
+
 		
 	# train the neural network
-	def train(self,inputs_list,targets_list):
-		# calculate outputs of each layer
-		# convert list to numpy array
-		inputs = numpy.array(inputs_list,ndmin=2).T
+	def train(self, inputs_list, targets_list):
+		# convert inputs list to 2d array
+		inputs = numpy.array(inputs_list, ndmin=2).T
+		targets = numpy.array(targets_list, ndmin=2).T
+		
 		activations = [inputs]
-		# for each layer in the network
-		for i in range(len(self.shape)-1):
-			# print(i, activations)
-			outputs = numpy.dot(self.weights[i],activations[i]) + numpy.tile(self.biases[i],(1,len(inputs_list)))
-			activations.append(self.activation_function(outputs))
-		errors = [False]*(len(self.shape))
-		errors[-1] = numpy.array(targets_list,ndmin=2).T-activations[-1]
-		# adjust the weights and biases of each layer
-		new_weights = []
-		new_biases = []
-		print(self.shape)
-		for i in reversed(range(1,len(self.shape))):
-			# adjust weights of connections between layer i-1 and layer i
-			#print("weights")
-			#print(errors[i])
-			#print("e:",errors[i].shape,"a:",activations[i].shape,activations[i-1].shape)
-			#print(activations[i][0])
-			# 
-			adjust_weights = self.lr * numpy.dot((errors[i] * activations[i] * (1.0 - activations[i])),numpy.transpose(activations[i-1]))
-			#print(self.weights[i-1],adjust_weights)
-			#print(self.weights[i-1],"\n",adjust_weights)
-			new_layer_weights = self.weights[i-1] + adjust_weights
-			new_weights.append(new_layer_weights)
-			# adjust biases of nodes in layer i
-			#print("biases")
-			adjust_biases = self.lr * numpy.dot(errors[i],numpy.ones((errors[i].shape[1],1)))/errors[i].shape[1]
-			#print(self.biases[i-1],"\n",adjust_biases)
-			#print(self.biases[i-1],adjust_biases)
-			new_layer_biases = self.biases[i-1] + adjust_biases
-			new_biases.append(new_layer_biases)
-			# calculate errors for layer i-1 
-			errors[i-1] = numpy.dot(self.weights[i-1].T,errors[i])
-		new_weights = new_weights[::-1]
-		new_biases = new_biases[::-1]
-		self.weights = new_weights
-		self.biases = new_biases
+		for i in range(0,self.layers-1):
+			layer_outputs = numpy.dot(self.weights[i],activations[i])
+			activations.append(self.activation_function(layer_outputs))
+		
+		errors = [False]*self.layers
+		# output layer error is the (target - actual)
+		# print(targets)
+		# print(activations[-1])
+		errors[-1] = targets.T - activations[-1]
+		for i in range(self.layers-2,-1,-1):
+			errors[i] = numpy.dot(self.weights[i].T,errors[i+1])
+		# hidden layer error is the output_errors, split by weights, recombined at hidden nodes
+		# hidden_errors = numpy.dot(self.who.T, output_errors) 
+		
+		for i in range(0,self.layers-1):
+			# print(errors[i+1].shape,activations[i+1].shape,activations[i].shape)
+			self.weights[i] += self.lr * numpy.dot((errors[i+1] * activations[i+1] * (1.0 - activations[i+1])), numpy.transpose(activations[i]))
+		# # update the weights for the links between the hidden and output layers
+		# self.who += self.lr * numpy.dot((output_errors * final_outputs * (1.0 - final_outputs)), numpy.transpose(hidden_outputs))
+		
+		# # update the weights for the links between the input and hidden layers
+		# self.wih += self.lr * numpy.dot((hidden_errors * hidden_outputs * (1.0 - hidden_outputs)), numpy.transpose(inputs))
+		
 		pass
-		
+
+	
 	# query the neural network
-	def query(self,inputs_list):
-		# convert list to numpy array
-		inputs = numpy.array(inputs_list,ndmin=2).T
-		activations = inputs
-		# for each layer in the network
-		for i in range(len(self.shape)-1):
-			# print(i, activations)
-			outputs = numpy.dot(self.weights[i],activations) + self.biases[i]
-			activations = self.activation_function(outputs)
-		# return final activations
-		return activations
-	
-	
-def main():
-	numpy.random.seed(1)
-	net = NeuralNetwork([5,3,2],0.1)
-	print("0", net.query([10,-10,99,0,5]))
-	for i in range(1,10):
-		inputs_list = numpy.random.rand(1000,5)
-		inputs_list = inputs_list.tolist()
-		targets_list = [[x[0]+x[1],x[3]+x[4]] for x in inputs_list]
-		net.train(inputs_list,targets_list)
-		print(i,": ",net.query([10,-10,99,0,5]))
+	def query(self, inputs_list):
+		# convert inputs list to 2d array
+		inputs = numpy.array(inputs_list, ndmin=2).T
+		activations = [inputs]
+		for i in range(0,self.layers-1):
+			layer_outputs = numpy.dot(self.weights[i],activations[i])
+			activations.append(self.activation_function(layer_outputs))
 		
-	return net
+		return activations[-1]
+
+def target(choice,length):
+	result = numpy.zeros(length) + 0.001
+	result[choice] = 0.999
+	return numpy.array(result,ndmin=2).T
+				
+def main():
+	layer_shape = [784,100,10]
+	learningrate = 0.1
+	n = NeuralNetwork(layer_shape,learningrate)
+	
+	# load the mnist training data CSV file into a list
+	training_data_file = open("mnist_dataset/mnist_train.csv", 'r')
+	training_data_list = training_data_file.readlines()
+	training_data_file.close()
+	
+	# load the mnist test data CSV file into a list
+	test_data_file = open("mnist_dataset/mnist_test.csv", 'r')
+	test_data_list = test_data_file.readlines()
+	test_data_file.close()
+	
+	# train the neural network
+
+	# epochs is the number of times the training data set is used for training
+	epochs = 100
+
+	for e in range(epochs):
+		print("Begin epoch",e)
+		random.shuffle(training_data_list)
+		# go through all records in the training data set
+		for record in training_data_list[0:1000]:
+			# split the record by the ',' commas
+			all_values = record.split(',')
+			# scale and shift the inputs
+			inputs = (numpy.asfarray(all_values[1:]) / 255.0 * 0.99) + 0.01
+			# create the target output values (all 0.01, except the desired label which is 0.99)
+			targets = target(int(all_values[0]),layer_shape[-1])
+			
+			n.train(inputs, targets.tolist())
+			pass
+		pass
+			
 	
 	
+		# test the neural network
+
+		# scorecard for how well the network performs, initially empty
+		scorecard = []
+
+		# go through all the records in the test data set
+		for record in test_data_list:
+				# Split the record by the ',' commas
+				all_values = record.split(',')
+				# Correct answer is first value
+				correct_label = int(all_values[0])
+				# Scale the inputs from all but first value
+				inputs = (numpy.asfarray(all_values[1:]) / 255.0 * 0.999) + 0.001
+				# Query the network
+				outputs = n.query(inputs)
+				
+				# Calculate the mean square error
+				score = (target(correct_label,layer_shape[-1])-outputs)
+				score = numpy.dot(score.T,score)
+				scorecard.append(score)
+				# Print first output and its associated score (for verification)
+				# if record == test_data_list[0]:
+					# print("outputs:\n",outputs)
+					# print("score:\n", score)
+	
+		scorecard_array = numpy.asarray(scorecard)
+		print ("loss = ", scorecard_array.sum() / scorecard_array.size)
+	return n
 	
 if __name__ == "__main__":
 	pass
