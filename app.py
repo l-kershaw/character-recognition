@@ -18,19 +18,12 @@ import pandas as pd
 app = dash.Dash(__name__,external_stylesheets=[dbc.themes.BOOTSTRAP])
 server = app.server
 
-canvas_width = 300
+canvas_width = 250
 bg_filename = "https://l-kershaw.github.io/images/border.jpg"
 
 n = nn.init_trained_network("./trained_network/init_data.csv","./trained_network/weights.csv")
 
 app.layout = html.Div([
-		# html.H2('Hello World'),
-		# dcc.Dropdown(
-				# id='dropdown',
-				# options=[{'label': i, 'value': i} for i in ['LA', 'NYC', 'MTL']],
-				# value='LA'
-		# ),
-		# html.Div(id='display-value'),
 		dbc.Row(
 			[
 			dbc.Col(
@@ -57,7 +50,9 @@ app.layout = html.Div([
 			)
 			]
 		)
-])
+	],
+	style={"width":750}
+)
 
 
 # @app.callback(Output('display-value', 'children'),
