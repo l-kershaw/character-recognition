@@ -1,6 +1,7 @@
 import numpy
 import scipy.special
 import random
+import pandas as pd
 
 class NeuralNetwork:
 		
@@ -73,8 +74,29 @@ def target(choice,length):
 	result = numpy.zeros(length) + 0.001
 	result[choice] = 0.999
 	return numpy.array(result,ndmin=2).T
+
+def init_trained_network(data_csv,weight_csv):
+	init_data = pd.read_csv(data_csv)
+	init_data = init_data.values.tolist()
+	shape = init_data[0]
+	shape = [int(x) for x in shape]
+	lr = init_data[1][0]
+	print(shape,lr)
+	n = NeuralNetwork(shape,lr)
+	df = pd.read_csv(weight_csv)
+	read_weights = []
+	row = 0
+	for i in range(0,n.layers-1):
+		layer_weights = df[row:row+n.shape[i+1]].to_numpy()
+		layer_weights = layer_weights[:,:n.shape[i]]
+		read_weights.append(layer_weights)
+		row += n.shape[i+1]
+	n.weights = read_weights
+	return n
 				
 def main():
+	numpy.random.seed(1)
+
 	layer_shape = [784,100,10]
 	learningrate = 0.1
 	n = NeuralNetwork(layer_shape,learningrate)
@@ -92,10 +114,10 @@ def main():
 	# train the neural network
 
 	# epochs is the number of times the training data set is used for training
-	epochs = 100
+	epochs = 200
 
 	for e in range(epochs):
-		print("Begin epoch",e)
+		print("Begin epoch:",e,"lr:",lr)
 		random.shuffle(training_data_list)
 		# go through all records in the training data set
 		for record in training_data_list[0:1000]:
@@ -139,6 +161,17 @@ def main():
 	
 		scorecard_array = numpy.asarray(scorecard)
 		print ("loss = ", scorecard_array.sum() / scorecard_array.size)
+		
+		# Reduce learning rate by 5%
+		n.lr = 0.95*n.lr
+	# save weights
+	matrices = []
+	for i in range(0,n.layers-1):
+		matrices.append(pd.DataFrame.from_records(n.weights[i]))
+	print(matrices)
+	df = pd.concat(matrices)
+	print(df)
+	df.to_csv('./trained_network/weights.csv',index=False)
 	return n
 	
 if __name__ == "__main__":
