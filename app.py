@@ -42,21 +42,17 @@ app.layout = html.Div([
 										filename=bg_filename,
 										hide_buttons=['pencil','line','zoom','pan','rectangle','select'],#,'undo','redo'],
 										goButtonTitle='Process')],
-				width=10,
-				lg=5
+				width=5
 			),
 			dbc.Col(
 				[html.Img(id='my-image',width=canvas_width)],
-				width=10,
-				lg=5
+				width=5
 			),
 			dbc.Col(
 				[html.Div(id='digit-output',children=[])],
-				width=10
-				lg=2
+				width=2
 			)
-			],
-			no_gutters=True
+			]
 		)
 ])
 
