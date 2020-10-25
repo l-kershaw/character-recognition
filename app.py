@@ -20,6 +20,8 @@ server = app.server
 canvas_width = 300
 bg_filename = "https://l-kershaw.github.io/images/border.jpg"
 
+n = nn.init_trained_network("./trained_network/init_data.csv","./trained_network/weights.csv")
+
 app.layout = html.Div([
 		# html.H2('Hello World'),
 		# dcc.Dropdown(
@@ -72,7 +74,6 @@ def update_data(string):
 	return array_to_data_url((255-255 * full_data).astype(np.uint8)), string
 
 if __name__ == '__main__':
-	n = nn.init_trained_network("./trained_network/init_data.csv","./trained_network/weights.csv")
 	app.run_server(debug=True)
 
 
