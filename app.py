@@ -15,13 +15,17 @@ import numpy as np
 import pandas as pd
 
 
-app = dash.Dash(__name__,external_stylesheets=[dbc.themes.BOOTSTRAP])
+app = dash.Dash(__name__,external_stylesheets=[dbc.themes.COSMO])
 server = app.server
 
 canvas_width = 250
 bg_filename = "https://l-kershaw.github.io/images/border.jpg"
 
 n = nn.init_trained_network("./trained_network/init_data.csv","./trained_network/weights.csv")
+
+app.head = [
+	html.Meta(content="width=device-width, initial-scale=1",name="viewport")
+	]
 
 app.layout = html.Div([
 		dbc.Row(
@@ -35,23 +39,22 @@ app.layout = html.Div([
 										filename=bg_filename,
 										hide_buttons=['pencil','line','zoom','pan','rectangle','select'],#,'undo','redo'],
 										goButtonTitle='Process')],
-				width=10,
+				width=12,
 				md=4
 			),
 			dbc.Col(
 				[html.Img(id='my-image',width=canvas_width)],
-				width=10,
+				width=12,
 				md=4
 			),
 			dbc.Col(
 				[html.Div(id='digit-output',children=[])],
-				width=10,
+				width=12,
 				md=2
 			)
 			]
 		)
-	],
-	style={"width":750}
+	]
 )
 
 
