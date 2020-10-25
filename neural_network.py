@@ -105,33 +105,34 @@ def main():
 	training_data_file = open("mnist_dataset/mnist_train.csv", 'r')
 	training_data_list = training_data_file.readlines()
 	training_data_file.close()
-	
+	print("training length:",len(training_data_list))
 	# load the mnist test data CSV file into a list
 	test_data_file = open("mnist_dataset/mnist_test.csv", 'r')
 	test_data_list = test_data_file.readlines()
 	test_data_file.close()
+	print("testing length: ",len(test_data_list))
 	
 	# train the neural network
 
 	# epochs is the number of times the training data set is used for training
-	epochs = 200
-
+	epochs = 10
+	batch = 1000
 	for e in range(epochs):
-		print("Begin epoch:",e,"lr:",lr)
+		print("Begin epoch:",e,"lr:",n.lr)
 		random.shuffle(training_data_list)
 		# go through all records in the training data set
-		for record in training_data_list[0:1000]:
-			# split the record by the ',' commas
-			all_values = record.split(',')
-			# scale and shift the inputs
-			inputs = (numpy.asfarray(all_values[1:]) / 255.0 * 0.99) + 0.01
-			# create the target output values (all 0.01, except the desired label which is 0.99)
-			targets = target(int(all_values[0]),layer_shape[-1])
+		for i in range(int(len(training_data_list)/batch)):
 			
-			n.train(inputs, targets.tolist())
-			pass
-		pass
-			
+			for record in training_data_list[batch*i:batch*(i+1)]:
+				# split the record by the ',' commas
+				all_values = record.split(',')
+				# scale and shift the inputs
+				inputs = (numpy.asfarray(all_values[1:]) / 255.0 * 0.99) + 0.01
+				# create the target output values (all 0.01, except the desired label which is 0.99)
+				targets = target(int(all_values[0]),layer_shape[-1])
+				
+				n.train(inputs, targets.tolist())
+
 	
 	
 		# test the neural network
@@ -162,8 +163,8 @@ def main():
 		scorecard_array = numpy.asarray(scorecard)
 		print ("loss = ", scorecard_array.sum() / scorecard_array.size)
 		
-		# Reduce learning rate by 5%
-		n.lr = 0.95*n.lr
+		# Reduce learning rate by 2%
+		n.lr = 0.98*n.lr
 	# save weights
 	matrices = []
 	for i in range(0,n.layers-1):
