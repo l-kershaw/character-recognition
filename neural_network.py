@@ -81,7 +81,7 @@ def init_trained_network(data_csv,weight_csv):
 	shape = init_data[0]
 	shape = [int(x) for x in shape]
 	lr = init_data[1][0]
-	print(shape,lr)
+	# print(shape,lr)
 	n = NeuralNetwork(shape,lr)
 	df = pd.read_csv(weight_csv)
 	read_weights = []

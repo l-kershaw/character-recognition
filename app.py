@@ -2,6 +2,7 @@ import os
 import dash
 import dash_core_components as dcc
 import dash_html_components as html
+import dash_bootstrap_components as dbc
 from dash.dependencies import Input, Output, State
 from dash.exceptions import PreventUpdate
 from dash_canvas import DashCanvas
@@ -14,7 +15,7 @@ import numpy as np
 import pandas as pd
 
 
-app = dash.Dash(__name__)
+app = dash.Dash(__name__,external_stylesheets=[dbc.themes.BOOTSTRAP])
 server = app.server
 
 canvas_width = 300
@@ -30,16 +31,29 @@ app.layout = html.Div([
 				# value='LA'
 		# ),
 		# html.Div(id='display-value'),
-		DashCanvas(	id='draw-canvas',
-								tool='pencil',
-								width=canvas_width,
-								lineWidth=20,
-								lineColor='black',
-								filename=bg_filename,
-								hide_buttons=['pencil','line','zoom','pan','rectangle','select'],#,'undo','redo'],
-								goButtonTitle='Process'),
-		html.Img(id='my-image',width=canvas_width),
-		html.Div(id='digit-output',children=[])
+		dbc.Row(
+			[
+			dbc.Col(
+				[DashCanvas(	id='draw-canvas',
+										tool='pencil',
+										width=canvas_width,
+										lineWidth=20,
+										lineColor='black',
+										filename=bg_filename,
+										hide_buttons=['pencil','line','zoom','pan','rectangle','select'],#,'undo','redo'],
+										goButtonTitle='Process')],
+				width=4
+			),
+			dbc.Col(
+				[html.Img(id='my-image',width=canvas_width)],
+				width=4
+			),
+			dbc.Col(
+				[html.Div(id='digit-output',children=[])],
+				width=4
+			)
+			]
+		)
 ])
 
 
@@ -70,8 +84,13 @@ def update_data(string):
 	# print(data)
 	output = n.query(flat_data)
 	output = output.flatten()
-	string = [str(i)+": "+str(output[i])+"\n" for i in range(len(output))]
-	return array_to_data_url((255-255 * full_data).astype(np.uint8)), string
+	out_sum = float(sum(output))
+	output = [(i,output[i]/out_sum) for i in range(len(output))]
+	output.sort(reverse=True,key=lambda x : x[1])
+	
+	guesses = [str(x[0])+": "+ "{:.2f}%".format(x[1]*100) for x in output]
+	guesses = [html.P(x) for x in guesses]
+	return array_to_data_url((255-255 * full_data).astype(np.uint8)), guesses
 
 if __name__ == '__main__':
 	app.run_server(debug=True)
