@@ -84,12 +84,18 @@ def update_data(string):
 	# print(data)
 	output = n.query(flat_data)
 	output = output.flatten()
+	# Rescale outputs
 	out_sum = float(sum(output))
 	output = [(i,output[i]/out_sum) for i in range(len(output))]
+	# Sort outputs in decreasing likelihood order
 	output.sort(reverse=True,key=lambda x : x[1])
 	
+	# Format guesses as strings
 	guesses = [str(x[0])+": "+ "{:.2f}%".format(x[1]*100) for x in output]
+	# Wrap guesses in <p> elements
 	guesses = [html.P(x) for x in guesses]
+	# Only return top 5 guesses
+	guesses = guesses[:5]
 	return array_to_data_url((255-255 * full_data).astype(np.uint8)), guesses
 
 if __name__ == '__main__':
