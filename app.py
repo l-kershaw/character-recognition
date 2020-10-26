@@ -15,7 +15,7 @@ import numpy as np
 import pandas as pd
 
 
-app = dash.Dash(__name__,external_stylesheets=[dbc.themes.COSMO])
+app = dash.Dash(__name__,external_stylesheets=[dbc.themes.COSMO],assets_ignore="base")
 server = app.server
 
 canvas_width = 250
@@ -27,7 +27,37 @@ app.head = [
 	html.Meta(content="width=device-width, initial-scale=1",name="viewport")
 	]
 
-app.layout = html.Div([
+
+banner = dbc.Row(
+	className="banner",
+	children=[
+		dbc.Col([html.A(
+				id="back",
+				children=[html.Img(src=app.get_asset_url("back.png"))],
+				href="https://l-kershaw.github.io/coding/2020-10-character-recognition",
+			)],
+			width=2
+		),
+		dbc.Col(
+			[html.H2("Character Recognition")],
+			width=10,
+			md=6
+		),
+		
+		html.A(
+				id="gh-link",
+				children=["View on GitHub"],
+				href="https://github.com/l-kershaw/character-recognition",
+				style={"color": "white", "border": "solid 1px white"},
+		),
+		html.Img(src=app.get_asset_url("GitHub-Mark-Light-64px.png")),
+	]
+)
+
+app.layout = html.Div(
+		className="",
+		children=[
+		banner,
 		dbc.Row(
 			[
 			dbc.Col(
@@ -53,7 +83,9 @@ app.layout = html.Div([
 				md=2
 			)
 			]
-		)
+		)#,
+		# html.Data(id='width-div',value=''),
+		# dcc.Input(id='test-input',value='test')
 	]
 )
 
@@ -63,7 +95,15 @@ app.layout = html.Div([
 # def display_value(value):
 		# return 'You have selected "{}"'.format(value)
 
-
+# app.clientside_callback(
+    # """
+    # function(largeValue1) {
+        # return window.innerWidth.toString()
+    # }
+    # """,
+    # Output('width-div', 'value'),
+    # [Input('test-input', 'value')]
+# )
 
 
 
