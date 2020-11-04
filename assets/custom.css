@@ -1,3 +1,11 @@
+.vertical-center {
+  margin: 0;
+  position: absolute;
+  top: 50%;
+  -ms-transform: translateY(-50%);
+  transform: translateY(-50%);
+}
+
 .banner > a > img {
   height: 70px;
   float: left;
@@ -18,7 +26,7 @@
 .banner > a > img:hover {
   filter: brightness(2);
 }
-.banner > img {
+#gh > img {
   height: 36px;
   float: right;
   margin: 10px;

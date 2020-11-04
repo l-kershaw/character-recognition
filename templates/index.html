@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+	<title>Character Recognition</title>
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+	<link rel="stylesheet" href="{{url_for('static', filename='custom_bootstrap.css')}}">
+</head>
+
+<body>
+	<nav class="navbar navbar-expand-md navbar-dark bg-primary">
+		<a class="navbar-brand" href="#">Character Recognition</a>
+		<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+			<span class="navbar-toggler-icon"></span>
+		</button>
+		<div class="collapse navbar-collapse" id="navbarNav">
+			<ul class="navbar-nav">
+				<li class="nav-item">
+					<a class="nav-link" href="https://l-kershaw.github.io/coding/2020-10-character-recognition">Back to Summary</a>
+				</li>
+				<li class="nav-item">
+					<a class="nav-link" href="https://github.com/l-kershaw/character-recognition">View on GitHub</a>
+				</li>
+			</ul>
+		</div>
+	</nav>
+
+	<div class="row mt-2">
+		<div class="col-md-1 px-0"></div>
+		<div class="col-md card-group">
+			<div class="card bg-light m-2">
+				<div class="card-header">User Input</div>
+				<div class="card-body">
+					<canvas id="canvas" style="width:100%" width="280" height="280"></canvas>
+					<input type="button" class="myButton" value="Predict" style="">
+					<input type="button" id="clearButton" value="Clear" style="">
+				</div>
+			</div>
+			<div class="w-100 d-none d-sm-block d-md-none"></div>
+			<div class="card bg-light m-2">
+				<div class="card-header">Model Input</div>
+				<div class="card-body">
+					<img id="procImg" style="width: 100%">
+				</div>
+			</div>
+			<div class="w-100 d-none d-sm-block d-lg-none"></div>
+			<div class="card bg-light m-2">
+				<div class="card-header">Model Output</div>
+				<div class="card-body">
+					<h1 id="result">Awaiting input</h1>
+				</div>
+			</div>
+		</div>
+		<div class="col-md-1"></div>
+	</div>
+
+
+	<script src="http://code.jquery.com/jquery-3.5.1.min.js" integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0=" crossorigin="anonymous"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+	<!-- <script src="{{url_for('static',filename='jquery-3.2.0.min.js')}}"></script> -->
+  <script src="{{url_for('static',filename='index.js')}}"></script>
+  <script type="text/javascript">
+ 		$(".myButton").click(function(){
+ 			$('#result').text('  Predicting...');
+ 			var $SCRIPT_ROOT = {{request.script_root|tojson|safe}};
+			console.log($SCRIPT_ROOT);
+ 			var canvasObj = document.getElementById("canvas");
+ 			var img = canvasObj.toDataURL('image/png');
+			$.ajax({
+				type: "POST",
+				url: $SCRIPT_ROOT + "/prepare/",
+				data: img,
+				success: function(data){
+					$('#procImg').attr("src",data);
+				}
+			});
+ 			$.ajax({
+ 				type: "POST",
+ 				url: $SCRIPT_ROOT + "/predict/",
+ 				data: img,
+ 				success: function(data){
+ 					$('#result').text('Predicted Output: ' + data);
+ 				}
+ 			});
+ 		});
+ </script>
+</body>
+</html>
