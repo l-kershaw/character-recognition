@@ -9,8 +9,8 @@ import base64
 
 import sys
 import os
-sys.path.append(os.path.abspath("./trained_network"))
-from load import *
+# sys.path.append(os.path.abspath("./trained_network"))
+# from load import *
 
 # UPLOAD_FOLDER = '/images/'
 # ALLOWED_EXTENSIONS = {'txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif', 'css'}
